@@ -1,0 +1,314 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Toll System</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            background: #0f172a;
+            color: white;
+            text-align: center;
+            overflow-x: hidden;
+        }
+        .live-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+            background: #0f172a;
+        }
+        .live-bg::before,
+        .live-bg::after {
+            content: "";
+            position: absolute;
+            width: 70vmax;
+            height: 70vmax;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.55;
+            will-change: transform;
+        }
+        .live-bg::before {
+            left: -25%;
+            top: -15%;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.45) 0%, transparent 68%);
+            animation: blob-a 22s ease-in-out infinite;
+        }
+        .live-bg::after {
+            right: -30%;
+            bottom: -20%;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.4) 0%, transparent 68%);
+            animation: blob-b 26s ease-in-out infinite;
+        }
+        .live-bg .live-grid {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(148, 163, 184, 0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
+            background-size: 48px 48px;
+            animation: grid-drift 40s linear infinite;
+            mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black 20%, transparent 75%);
+        }
+        @keyframes blob-a {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(12%, 18%) scale(1.08); }
+            66% { transform: translate(-8%, 10%) scale(0.95); }
+        }
+        @keyframes blob-b {
+            0%, 100% { transform: translate(0, 0) scale(1.05); }
+            40% { transform: translate(-14%, -12%) scale(0.92); }
+            70% { transform: translate(10%, -6%) scale(1.1); }
+        }
+        @keyframes grid-drift {
+            0% { background-position: 0 0, 0 0; }
+            100% { background-position: 48px 48px, 48px 48px; }
+        }
+        .content {
+            position: relative;
+            z-index: 1;
+            padding: 8px 16px 48px;
+        }
+        h1 {
+            margin-top: 20px;
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+        h1:hover {
+            color: #e0f2fe;
+            text-shadow: 0 0 28px rgba(56, 189, 248, 0.45);
+        }
+        .card {
+            position: relative;
+            background: rgba(30, 41, 59, 0.72);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            margin: 20px auto;
+            padding: 20px;
+            width: min(340px, 92vw);
+            border-radius: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+            transition:
+                transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.35s ease,
+                border-color 0.35s ease,
+                background 0.35s ease;
+        }
+        .card:hover {
+            transform: translateY(-6px) scale(1.02);
+            border-color: rgba(56, 189, 248, 0.45);
+            box-shadow:
+                0 20px 48px rgba(0, 0, 0, 0.45),
+                0 0 0 1px rgba(56, 189, 248, 0.2),
+                0 0 40px rgba(56, 189, 248, 0.12);
+            background: rgba(30, 41, 59, 0.88);
+        }
+        .card h2 {
+            transition: color 0.3s ease;
+        }
+        .card:hover h2 {
+            color: #7dd3fc;
+        }
+        .value {
+            font-size: 40px;
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .on { background: green; color: white; }
+        .off { background: red; color: white; }
+        .datetime-block { margin-top: 8px; }
+        .dt-row { margin: 14px 0; }
+        .dt-label {
+            display: block;
+            font-size: 13px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 6px;
+        }
+        .dt-value { font-size: 26px; font-weight: 600; line-height: 1.25; }
+        @media (prefers-reduced-motion: reduce) {
+            .live-bg::before,
+            .live-bg::after,
+            .live-bg .live-grid {
+                animation: none;
+            }
+            .live-bg::before { transform: translate(5%, 5%); opacity: 0.35; }
+            .live-bg::after { transform: translate(-5%, -5%); opacity: 0.3; }
+            .card {
+                transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            }
+            .card:hover {
+                transform: none;
+            }
+            h1 { transition: none; }
+            h1:hover { text-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="live-bg" aria-hidden="true"><div class="live-grid"></div></div>
+
+<main class="content">
+<h1>🚗 Smart Toll System</h1>
+
+<div class="card">
+    <h2>Current date &amp; time</h2>
+    <div class="datetime-block">
+        <div class="dt-row">
+            <span class="dt-label">Date</span>
+            <div id="dateonly" class="dt-value">—</div>
+        </div>
+        <div class="dt-row">
+            <span class="dt-label">Time</span>
+            <div id="timeonly" class="dt-value">—</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Vehicle Count</h2>
+    <div id="count" class="value">0</div>
+</div>
+
+<div class="card">
+    <h2>Gate Status</h2>
+    <div id="gate" class="value">CLOSED</div>
+</div>
+
+<div class="card">
+    <h2>Vehicle Speed</h2>
+    <div id="speed" class="value">0 km/h</div>
+</div>
+
+<div class="card">
+    <h2>Serial Output</h2>
+    <div id="serial" class="value" style="font-size:18px; white-space: pre-wrap; text-align:left;">-</div>
+</div>
+
+</main>
+
+<script>
+/** Resolve API URL for Vercel and XAMPP paths. */
+const API_STATUS_CANDIDATES = (() => {
+    const pathParts = window.location.pathname.split("/").filter(Boolean);
+    const firstPart = pathParts.length > 0 ? pathParts[0] : "";
+    const projectSegment = firstPart && !firstPart.includes(".") ? `/${firstPart}` : "";
+    return [
+        "/api/status",
+        "api/status",
+        `${projectSegment}/api/status.php`,
+        "api/status.php",
+        "/api/status.php"
+    ];
+})();
+let isFetching = false;
+
+function updateClock() {
+    const now = new Date();
+    if (Number.isNaN(now.getTime())) return;
+    document.getElementById("dateonly").innerText = now.toLocaleDateString(undefined, {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+    });
+    document.getElementById("timeonly").innerText = now.toLocaleTimeString(undefined, {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+    });
+}
+
+function renderDateTime(inputDate) {
+    const dt = inputDate instanceof Date ? inputDate : new Date(inputDate);
+    if (Number.isNaN(dt.getTime())) return;
+    document.getElementById("dateonly").innerText = dt.toLocaleDateString(undefined, {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+    });
+    document.getElementById("timeonly").innerText = dt.toLocaleTimeString(undefined, {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+    });
+}
+
+function setOfflineState(reason = "Waiting for API...") {
+    document.getElementById("gate").innerText = "OFFLINE";
+    document.getElementById("speed").innerText = "0 km/h";
+    document.getElementById("serial").innerText = reason;
+}
+
+function getFetchHelpText(err) {
+    const msg = String(err?.message || "Unknown error");
+    if (window.location.protocol === "file:") {
+        return "API unreachable: open this page through XAMPP URL (http://localhost/...), not by double-clicking the HTML file.";
+    }
+    if (msg.toLowerCase().includes("failed to fetch")) {
+        return "API unreachable: start Apache in XAMPP and verify api/status.php exists under your web root.";
+    }
+    return `API error: ${msg}`;
+}
+
+async function getData() {
+    if (isFetching) return;
+    isFetching = true;
+
+    try {
+        let res = null;
+        let lastError = null;
+        for (const baseUrl of API_STATUS_CANDIDATES) {
+            try {
+                const trial = await fetch(`${baseUrl}?_=${Date.now()}`, { cache: "no-store" });
+                if (trial.ok) {
+                    res = trial;
+                    break;
+                }
+                lastError = new Error(`HTTP ${trial.status} for ${baseUrl}`);
+            } catch (e) {
+                lastError = e;
+            }
+        }
+        if (!res) throw lastError || new Error("Unable to reach status API");
+
+        const data = await res.json();
+        if (typeof data !== "object" || data === null) throw new Error("Invalid JSON");
+
+        document.getElementById("count").innerText = Number.isFinite(Number(data.count)) ? Number(data.count) : 0;
+        document.getElementById("gate").innerText = String(data.gate ?? "CLOSED").toUpperCase();
+        document.getElementById("speed").innerText = `${Number(data.speed) || 0} km/h`;
+        document.getElementById("serial").innerText = String(data.serial ?? "-");
+        if (data.updated_at || data.date) {
+            renderDateTime(String(data.updated_at || data.date));
+        }
+    } catch (err) {
+        setOfflineState(getFetchHelpText(err));
+    } finally {
+        isFetching = false;
+    }
+}
+
+updateClock();
+setInterval(getData, 1000);
+getData();
+</script>
+
+</body>
+</html>
