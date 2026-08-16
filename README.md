@@ -17,7 +17,8 @@ This is a PHP + MySQL based web project developed using XAMPP.
 5. Open browser:
    http://localhost/iot
       OR
-link:- (Pradip)tollfreegate.netlify.app
+link:- (Pradip)
+      tollfreegate.netlify.app
 
 ## 🗄️ Database Setup
 - Open phpMyAdmin
