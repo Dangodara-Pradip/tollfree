@@ -16,6 +16,8 @@ This is a PHP + MySQL based web project developed using XAMPP.
 4. Import database in phpMyAdmin
 5. Open browser:
    http://localhost/iot
+      OR
+link:- Pradip-//tollfreegate.netlify.app
 
 ## 🗄️ Database Setup
 - Open phpMyAdmin
@@ -23,4 +25,4 @@ This is a PHP + MySQL based web project developed using XAMPP.
 - Import `database.sql` file
 
 ## 👨‍💻 Developer
-Pradip
+Dangodara Pradip 
